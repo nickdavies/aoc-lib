@@ -114,6 +114,20 @@ impl<T> Map<T> {
         }
     }
 
+    pub fn iter_direction(
+        &self,
+        start: Location,
+        x_direction: Option<Direction>,
+        y_direction: Option<Direction>,
+    ) -> DirectionIterator<T> {
+        DirectionIterator {
+            map: self,
+            current: start,
+            x_direction,
+            y_direction,
+        }
+    }
+
     pub fn get_edges(&self) -> Vec<(Location, Direction)> {
         let mut out = Vec::new();
 
@@ -219,6 +233,32 @@ impl<'a, T> Iterator for RowIterator<'a, T> {
                 &self.row[self.col_num - 1],
             ))
         }
+    }
+}
+
+pub struct DirectionIterator<'a, T> {
+    current: Location,
+    x_direction: Option<Direction>,
+    y_direction: Option<Direction>,
+    map: &'a Map<T>,
+}
+
+impl<'a, T> Iterator for DirectionIterator<'a, T> {
+    type Item = (Location, &'a T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.x_direction.is_none() && self.y_direction.is_none() {
+            return None;
+        }
+        let mut new_location = self.current.clone();
+        if let Some(direction) = &self.x_direction {
+            new_location = self.map.go_direction(&new_location, direction)?;
+        }
+        if let Some(direction) = &self.y_direction {
+            new_location = self.map.go_direction(&new_location, direction)?;
+        }
+        self.current = new_location.clone();
+        Some((new_location.clone(), self.map.get(&new_location)))
     }
 }
 
