@@ -51,6 +51,25 @@ impl Direction {
             Self::West => Self::North,
         }
     }
+
+    pub fn index(&self) -> usize {
+        match self {
+            Self::North => 0,
+            Self::East => 1,
+            Self::South => 2,
+            Self::West => 3,
+        }
+    }
+
+    pub fn from_index(idx: usize) -> Option<Self> {
+        Some(match idx {
+            0 => Self::North,
+            1 => Self::East,
+            2 => Self::South,
+            3 => Self::West,
+            _ => return None,
+        })
+    }
 }
 
 #[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
@@ -84,6 +103,10 @@ pub struct Map<T>(pub Grid<T>);
 impl<T> Map<T> {
     pub fn get(&self, location: &Location) -> &T {
         &self.0[location.0][location.1]
+    }
+
+    pub fn get_mut(&mut self, location: &Location) -> &mut T {
+        &mut self.0[location.0][location.1]
     }
 
     pub fn get_location(&self, x: usize, y: usize) -> Option<Location> {
