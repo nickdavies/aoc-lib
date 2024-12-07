@@ -1,6 +1,7 @@
 use crate::parse::Parser;
 
 pub mod chars;
+pub mod strs;
 pub mod tuples;
 
 pub struct Identity;
