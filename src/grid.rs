@@ -84,6 +84,10 @@ impl UnboundLocation {
             Direction::West => UnboundLocation(self.0, self.1 - distance as i64),
         }
     }
+
+    pub fn to_bounded<T>(self, map: &Map<T>) -> Option<Location> {
+        map.get_location(self.0.try_into().ok()?, self.1.try_into().ok()?)
+    }
 }
 
 #[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
@@ -282,6 +286,27 @@ impl<'a, T> Iterator for DirectionIterator<'a, T> {
         }
         self.current = new_location.clone();
         Some((new_location.clone(), self.map.get(&new_location)))
+    }
+}
+
+pub struct CountingMap(Map<bool>, usize);
+
+impl CountingMap {
+    pub fn mark(&mut self, l: &Location) {
+        let v = self.0.get_mut(l);
+        if !*v {
+            self.1 += 1;
+        }
+        *v = true;
+    }
+    pub fn unique(&self) -> usize {
+        self.1
+    }
+}
+
+impl<T> From<&Map<T>> for CountingMap {
+    fn from(other: &Map<T>) -> Self {
+        Self(other.transform(|_, _| false), 0)
     }
 }
 
