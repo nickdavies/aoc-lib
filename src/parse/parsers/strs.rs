@@ -90,3 +90,17 @@ where
         self.0.parse_section(section.trim())
     }
 }
+
+pub struct Chars<T>(pub T);
+impl<'a, T, P, E> Parser<&'a str, Vec<T>, E> for Chars<P>
+where
+    P: Parser<char, T, E>,
+{
+    fn parse_section(&self, section: &'a str) -> Result<Vec<T>, E> {
+        let mut out = Vec::with_capacity(section.len());
+        for c in section.chars() {
+            out.push(self.0.parse_section(c)?);
+        }
+        Ok(out)
+    }
+}
