@@ -105,6 +105,17 @@ pub type Grid<T> = Vec<Vec<T>>;
 pub struct Map<T>(pub Grid<T>);
 
 impl<T> Map<T> {
+    pub fn parse<E>(input: &str, parse_char: fn(char) -> Result<T, E>) -> Result<Map<T>, E> {
+        let mut out = Vec::new();
+        for line in input.lines() {
+            let mut out_line = Vec::new();
+            for char in line.chars() {
+                out_line.push(parse_char(char)?);
+            }
+            out.push(out_line);
+        }
+        Ok(Map(out))
+    }
     pub fn get(&self, location: &Location) -> &T {
         &self.0[location.0][location.1]
     }
@@ -317,14 +328,6 @@ where
     type Error = E;
 
     fn try_from(input: &str) -> Result<Self, Self::Error> {
-        let mut out = Vec::new();
-        for line in input.lines() {
-            let mut out_line = Vec::new();
-            for char in line.chars() {
-                out_line.push(char.try_into()?);
-            }
-            out.push(out_line);
-        }
-        Ok(Map(out))
+        Self::parse(input, |c| c.try_into())
     }
 }
