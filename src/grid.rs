@@ -303,12 +303,20 @@ impl<'a, T> Iterator for DirectionIterator<'a, T> {
 pub struct CountingMap(Map<bool>, usize);
 
 impl CountingMap {
-    pub fn mark(&mut self, l: &Location) {
+    pub fn get(&self, location: &Location) -> bool {
+        *self.0.get(location)
+    }
+
+    pub fn mark(&mut self, l: &Location) -> bool {
         let v = self.0.get_mut(l);
-        if !*v {
+        let new = if !*v {
             self.1 += 1;
-        }
+            true
+        } else {
+            false
+        };
         *v = true;
+        new
     }
     pub fn unique(&self) -> usize {
         self.1
