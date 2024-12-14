@@ -105,6 +105,21 @@ pub type Grid<T> = Vec<Vec<T>>;
 pub struct Map<T>(pub Grid<T>);
 
 impl<T> Map<T> {
+    pub fn from_dimensions<F>(rows: usize, cols: usize, init: F) -> Self
+    where
+        F: Fn(Location) -> T,
+    {
+        let mut out = Vec::with_capacity(rows);
+        for row_id in 0..rows {
+            let mut row = Vec::with_capacity(cols);
+            for col_id in 0..cols {
+                row.push(init(Location(row_id, col_id)));
+            }
+            out.push(row);
+        }
+        Map(out)
+    }
+
     pub fn parse<E>(input: &str, parse_char: fn(char) -> Result<T, E>) -> Result<Map<T>, E> {
         let mut out = Vec::new();
         for line in input.lines() {
