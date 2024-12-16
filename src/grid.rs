@@ -131,6 +131,14 @@ impl<T> Map<T> {
         }
         Ok(Map(out))
     }
+
+    pub fn find<F>(&self, match_fn: F) -> Option<Location>
+    where
+        F: Fn(&(Location, &T)) -> bool,
+    {
+        self.iter().flatten().find(match_fn).map(|o| o.0)
+    }
+
     pub fn get(&self, location: &Location) -> &T {
         &self.0[location.0][location.1]
     }
