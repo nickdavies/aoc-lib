@@ -11,6 +11,17 @@ impl<T> Parser<T, T, std::convert::Infallible> for Identity {
     }
 }
 
+pub struct ParseFn<F>(pub F);
+
+impl<E, I, O, F> Parser<I, O, E> for ParseFn<F>
+where
+    F: Fn(I) -> Result<O, E>,
+{
+    fn parse_section(&self, section: I) -> Result<O, E> {
+        self.0(section)
+    }
+}
+
 pub struct ParseVec<T>(pub T);
 
 impl<E, S, I, INNER, T> Parser<I, Vec<T>, E> for ParseVec<INNER>
