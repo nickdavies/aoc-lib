@@ -352,6 +352,12 @@ impl<T> From<&Map<T>> for CountingMap {
     }
 }
 
+impl From<&CountingMap> for Map<bool> {
+    fn from(other: &CountingMap) -> Self {
+        Map(other.0 .0.clone())
+    }
+}
+
 impl<T, E> TryFrom<&str> for Map<T>
 where
     char: TryInto<T, Error = E>,
