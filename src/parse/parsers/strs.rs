@@ -10,6 +10,7 @@ impl<E, T: FromStr<Err = E>> Parser<&str, T, E> for ParseFromStr {
         section.parse()
     }
 }
+
 pub fn parse_input<'a, SPLIT, PARSE, E, S, FT>(
     make_sections: SPLIT,
     section_parser: PARSE,

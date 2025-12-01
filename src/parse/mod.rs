@@ -9,3 +9,10 @@ pub trait Sections<'a, T> {
 pub trait Parser<S, T, E> {
     fn parse_section(&self, section: S) -> Result<T, E>;
 }
+
+pub trait StatelessParser<S, E>
+where
+    Self: Sized,
+{
+    fn parse_section(section: S) -> Result<Self, E>;
+}

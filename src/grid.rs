@@ -132,6 +132,10 @@ impl<T> Map<T> {
         Ok(Map(out))
     }
 
+    pub fn width(&self) -> Option<usize> {
+        self.0.first().map(|r| r.len())
+    }
+
     pub fn find<F>(&self, match_fn: F) -> Option<Location>
     where
         F: Fn(&(Location, &T)) -> bool,
