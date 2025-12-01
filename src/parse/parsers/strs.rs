@@ -48,7 +48,7 @@ where
     P1: Parser<&'a str, T1, E1>,
 {
     fn parse_section(&self, section: &'a str) -> Result<(T0, T1), MidSplitError<E0, E1>> {
-        if section.len() % 2 != 0 {
+        if !section.len().is_multiple_of(2) {
             return Err(MidSplitError::NotEven(section.len()));
         }
         let (first, last) = section

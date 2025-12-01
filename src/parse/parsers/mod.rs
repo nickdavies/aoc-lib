@@ -40,6 +40,12 @@ where
 }
 
 pub struct Stateless<T>(PhantomData<T>);
+impl<T> Default for Stateless<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> Stateless<T> {
     pub fn new() -> Self {
         Self(PhantomData)

@@ -180,11 +180,11 @@ impl<T> Map<T> {
     }
 
     pub fn iter_direction(
-        &self,
+        &'_ self,
         start: Location,
         x_direction: Option<Direction>,
         y_direction: Option<Direction>,
-    ) -> DirectionIterator<T> {
+    ) -> DirectionIterator<'_, T> {
         DirectionIterator {
             map: self,
             current: start,
