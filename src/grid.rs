@@ -1,3 +1,23 @@
+use std::cmp::Ordering;
+
+#[derive(Debug)]
+pub enum Axis {
+    Rows,
+    Cols,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum MapError {
+    #[error("Out of bounds on {axis:?} requested {request} bound {bound}")]
+    BoundsError {
+        axis: Axis,
+        bound: usize,
+        request: i64,
+    },
+}
+
+type MapResult<T> = Result<T, MapError>;
+
 #[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
 pub enum Direction {
     North,
@@ -85,8 +105,19 @@ impl UnboundLocation {
         }
     }
 
-    pub fn to_bounded<T>(self, map: &Map<T>) -> Option<Location> {
-        map.get_location(self.0.try_into().ok()?, self.1.try_into().ok()?)
+    pub fn to_bounded<T>(self, map: &Map<T>) -> MapResult<Location> {
+        map.get_location(
+            self.0.try_into().map_err(|_| MapError::BoundsError {
+                axis: Axis::Rows,
+                request: self.0,
+                bound: map.0.len(),
+            })?,
+            self.1.try_into().map_err(|_| MapError::BoundsError {
+                axis: Axis::Cols,
+                request: self.1,
+                bound: map.width().unwrap_or(0),
+            })?,
+        )
     }
 }
 
@@ -151,11 +182,22 @@ impl<T> Map<T> {
         &mut self.0[location.0][location.1]
     }
 
-    pub fn get_location(&self, x: usize, y: usize) -> Option<Location> {
-        self.0
-            .get(x)
-            .and_then(|row| row.get(y))
-            .map(|_| Location(x, y))
+    pub fn get_location(&self, x: usize, y: usize) -> MapResult<Location> {
+        match self.0.get(x) {
+            Some(row) => match row.get(y) {
+                Some(_) => Ok(Location(x, y)),
+                None => Err(MapError::BoundsError {
+                    axis: Axis::Cols,
+                    bound: row.len(),
+                    request: y as i64,
+                }),
+            },
+            None => Err(MapError::BoundsError {
+                axis: Axis::Rows,
+                bound: self.0.len(),
+                request: x as i64,
+            }),
+        }
     }
 
     pub fn go_direction(&self, current: &Location, direction: &Direction) -> Option<Location> {
@@ -167,8 +209,14 @@ impl<T> Map<T> {
                     None
                 }
             }
-            Direction::East => self.get_location(current.0, current.1 + 1),
-            Direction::South => self.get_location(current.0 + 1, current.1),
+            Direction::East => match self.get_location(current.0, current.1 + 1) {
+                Ok(location) => Some(location),
+                Err(MapError::BoundsError { .. }) => None,
+            },
+            Direction::South => match self.get_location(current.0 + 1, current.1) {
+                Ok(location) => Some(location),
+                Err(MapError::BoundsError { .. }) => None,
+            },
             Direction::West => {
                 if current.1 != 0 {
                     Some(Location(current.0, current.1 - 1))
@@ -358,7 +406,7 @@ impl<T> From<&Map<T>> for CountingMap {
 
 impl From<&CountingMap> for Map<bool> {
     fn from(other: &CountingMap) -> Self {
-        Map(other.0 .0.clone())
+        Map(other.0.0.clone())
     }
 }
 
