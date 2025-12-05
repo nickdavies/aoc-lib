@@ -78,3 +78,36 @@ where
         }
     }
 }
+
+pub struct ParseSectionTuple2<P0, P1>(pub P0, pub P1);
+
+impl<'a, E0, E1, P0, P1, T0, T1>
+    Parser<
+        std::vec::IntoIter<&'a str>,
+        (T0, T1),
+        TupleError<E0, E1, std::convert::Infallible, String>,
+    > for ParseSectionTuple2<P0, P1>
+where
+    P0: Parser<&'a str, T0, E0>,
+    P1: Parser<&'a str, T1, E1>,
+{
+    fn parse_section(
+        &self,
+        mut section: std::vec::IntoIter<&'a str>,
+    ) -> Result<(T0, T1), TupleError<E0, E1, std::convert::Infallible, String>> {
+        let out = (
+            self.0
+                .parse_section(section.next().ok_or_else(|| TupleError::Missing(0))?)
+                .map_err(TupleError::ParseError0)?,
+            self.1
+                .parse_section(section.next().ok_or_else(|| TupleError::Missing(1))?)
+                .map_err(TupleError::ParseError1)?,
+        );
+        let next = section.next();
+        if let Some(extra) = next {
+            Err(TupleError::Extra(extra.to_string()))
+        } else {
+            Ok(out)
+        }
+    }
+}
