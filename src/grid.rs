@@ -119,6 +119,16 @@ impl UnboundLocation {
             })?,
         )
     }
+
+    pub fn direction_between(&self, other: &Self) -> Option<Direction> {
+        match (self.0.cmp(&other.0), self.1.cmp(&other.1)) {
+            (Ordering::Equal, Ordering::Less) => Some(Direction::East),
+            (Ordering::Equal, Ordering::Greater) => Some(Direction::West),
+            (Ordering::Less, Ordering::Equal) => Some(Direction::South),
+            (Ordering::Greater, Ordering::Equal) => Some(Direction::North),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd, Hash)]
