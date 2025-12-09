@@ -45,10 +45,10 @@ where
     }
 }
 
-pub struct ParseTuple3<'a, P0, P1, P2>(P0, P1, P2, &'a str);
+pub struct ParseTuple3<'a, P0, P1, P2>(pub P0, pub P1, pub P2, pub &'a str);
 
 impl<'a, E0, E1, E2, P0, P1, P2, T0, T1, T2>
-    Parser<&'a str, (T0, T1, T2), TupleError<E0, E1, E2, &'a str>> for ParseTuple3<'a, P0, P1, P2>
+    Parser<&'a str, (T0, T1, T2), TupleError<E0, E1, E2, String>> for ParseTuple3<'a, P0, P1, P2>
 where
     P0: Parser<&'a str, T0, E0>,
     P1: Parser<&'a str, T1, E1>,
@@ -57,7 +57,7 @@ where
     fn parse_section(
         &self,
         section: &'a str,
-    ) -> Result<(T0, T1, T2), TupleError<E0, E1, E2, &'a str>> {
+    ) -> Result<(T0, T1, T2), TupleError<E0, E1, E2, String>> {
         let mut parts = section.split(self.3);
         let out = (
             self.0
@@ -72,7 +72,7 @@ where
         );
         let next = parts.next();
         if let Some(extra) = next {
-            Err(TupleError::Extra(extra))
+            Err(TupleError::Extra(extra.to_string()))
         } else {
             Ok(out)
         }
