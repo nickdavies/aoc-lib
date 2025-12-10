@@ -92,6 +92,46 @@ where
     }
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum StripError<E> {
+    #[error("The subparser failed: {0:?}")]
+    ParserError(E),
+    #[error("The specified prefix was not found")]
+    PrefixMissing,
+}
+
+pub struct StripPrefix<'a, T>(pub T, pub &'a str);
+impl<'a, T, P, E> Parser<&'a str, T, StripError<E>> for StripPrefix<'a, P>
+where
+    P: Parser<&'a str, T, E>,
+{
+    fn parse_section(&self, section: &'a str) -> Result<T, StripError<E>> {
+        let remainder: &str = match section.strip_prefix(self.1) {
+            Some(s) => s,
+            None => return Err(StripError::PrefixMissing),
+        };
+        self.0
+            .parse_section(remainder)
+            .map_err(StripError::ParserError)
+    }
+}
+
+pub struct StripSuffix<'a, T>(pub T, pub &'a str);
+impl<'a, T, P, E> Parser<&'a str, T, StripError<E>> for StripSuffix<'a, P>
+where
+    P: Parser<&'a str, T, E>,
+{
+    fn parse_section(&self, section: &'a str) -> Result<T, StripError<E>> {
+        let remainder: &str = match section.strip_suffix(self.1) {
+            Some(s) => s,
+            None => return Err(StripError::PrefixMissing),
+        };
+        self.0
+            .parse_section(remainder)
+            .map_err(StripError::ParserError)
+    }
+}
+
 pub struct Chars<T>(pub T);
 impl<'a, T, P, E> Parser<&'a str, Vec<T>, E> for Chars<P>
 where
