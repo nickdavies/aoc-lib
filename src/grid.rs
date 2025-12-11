@@ -229,14 +229,8 @@ impl<T> Map<T> {
                     None
                 }
             }
-            Direction::East => match self.get_location(current.0, current.1 + 1) {
-                Ok(location) => Some(location),
-                Err(MapError::BoundsError { .. }) => None,
-            },
-            Direction::South => match self.get_location(current.0 + 1, current.1) {
-                Ok(location) => Some(location),
-                Err(MapError::BoundsError { .. }) => None,
-            },
+            Direction::East => self.get_location(current.0, current.1 + 1).ok(),
+            Direction::South => self.get_location(current.0 + 1, current.1).ok(),
             Direction::West => {
                 if current.1 != 0 {
                     Some(Location(current.0, current.1 - 1))
