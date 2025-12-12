@@ -96,6 +96,10 @@ impl Direction {
 pub struct UnboundLocation(pub i64, pub i64);
 
 impl UnboundLocation {
+    pub fn manhattan_dist(&self, other: &Self) -> u64 {
+        self.0.abs_diff(other.0) + self.1.abs_diff(other.1)
+    }
+
     pub fn go_direction(&self, direction: &Direction, distance: usize) -> UnboundLocation {
         match direction {
             Direction::North => UnboundLocation(self.0 - distance as i64, self.1),
